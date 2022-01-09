@@ -1,0 +1,58 @@
+name: CI
+on:
+  # Triggers the workflow on push or pull request events but only for the main branch
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+
+jobs:
+  docker-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Docker build with tag
+        run: cd app && docker build -t ahamedyaserarafath/simple-factorial-goapp:latest .
+      # ToDo: Need to send the username and password
+      # Commenting out for future working
+      - name: docker login with username and password
+        run: echo "docker login"
+      - name: Push the docker image 
+        run: echo "docker push ahamedyaserarafath/simple-factorial-goapp:latest"
+  build:
+    needs: docker-build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setting the virtual environment
+        run: python3 -m venv .venv
+      - name: Sourcing the virtual environment
+        run: source .venv/bin/activate
+      - name: pip install requirement  
+        run: pip install -r requirements.txt
+      # For now running dummy command it out as it requries creds
+      - name: Run CDK synth to make it pass or fail
+        run: echo "cdk synth"
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setting the virtual environment
+        run: python3 -m venv .venv
+      - name: Sourcing the virtual environment
+        run: source .venv/bin/activate
+      - name: pip install requirement  
+        run: pip install -r requirements.txt
+      # For now running dummy command it out as it requries creds
+      - name: Run CDK synth to make it pass or fail
+        run: echo "cdk deploy"
+  Test:
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      # Keeping in place for future reference
+      - name: Run a one-line script
+        run: echo "Running the test case"
